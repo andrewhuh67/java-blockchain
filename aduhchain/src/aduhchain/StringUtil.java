@@ -2,6 +2,7 @@ package aduhchain;
 import java.security.MessageDigest;
 import java.security.Signature;
 import java.util.Base64;
+import java.security.*;
 
 public class StringUtil {
 	public static String applySha256(String input) {
@@ -40,7 +41,7 @@ public class StringUtil {
 		return output;
 		
 	}
-	public static boolean verifyECDSASign(PublicKey publicKey, String data, byte[] signature) {
+	public static boolean verifyECDSASig(PublicKey publicKey, String data, byte[] signature) {
 		try {
 			Signature ecdsaVerify = Signature.getInstance("ECDSA", "BC");
 			ecdsaVerify.initVerify(publicKey);
