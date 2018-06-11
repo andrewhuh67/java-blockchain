@@ -41,12 +41,53 @@ public class Transaction {
 		String data = StringUtil.getStringFromKey(sender) + StringUtil.getStringFromKey(recipient) + Float.toString(value);
 		return StringUtil.verifyECDSASig(sender, data, signature);
 	}
-}
-
-public class TransactionInput {
 	
-}
-
-public class TransactionOutput {
+	public boolean processTransaction() {
+		if(verifySignature() == false) {
+			System.out.println("#Transaction Signature failed to verify");
+			return false;
+		}
+		
+		for (TransactionInput i : inputs) {
+			i.UTXO = AduhChain.UTXOs.get(i.transactionOutputId);
+		}
+		
+		if(getInputsValue() < AduhChain.minimumTransaction) {
+			System.out.println("#Transaction Inputs to small: " + getInputsValue());
+			return false;
+		}
+		
+		float leftOver = getInputsValue() - value;
+		transactionId = calculateHash();
+		outputs.add(new TransactionOutput( this.recipient, value, transactionId));
+		outputs.add(new TransactionOutput( this.sender, leftOver, transactionId));
+		
+		for(TransactionOutput o : outputs) {
+			AduhChain.UTXOs.put(o.id, o);
+		}
+		
+		for(TransactionInput i : inputs) {
+			if(i.UTXO == null) continue;
+			AduhChain.UTXOs.remove(i.UTXO.id);
+		}
+		
+		return true;
+	}
 	
+	public float getInputsValue() {
+		float total = 0;
+		for(TransactionInput i : inputs) {
+			if(i.UTXO == null) continue;
+			total += i.UTXO.value;
+		}
+		return total;
+	}
+	
+	public float getOutputsValue() {
+		float total = 0;
+		for(TransactionOutput o : outputs) {
+			total += o.value;
+		}
+		return total;
+	}
 }
