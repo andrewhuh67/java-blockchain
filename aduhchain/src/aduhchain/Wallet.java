@@ -60,6 +60,11 @@ public class Wallet {
 		
 		Transaction newTransaction = new Transaction(publicKey, _recipient, value, inputs);
 		newTransaction.generateSignature(privateKey);
+		
+		for(TransactionInput input: inputs) {
+			UTXOs.remove(input.transactionOutputId);
+		}
+		return newTransaction;
 	}
 	
 }
